@@ -287,7 +287,7 @@ def all_pages_precalificacion(region, comuna):
                 else:
                     break
             # Creating dataframes
-            print(f'Page {page_number} out of {number_of_pages}')
+            print(f'- Page {page_number} out of {number_of_pages}')
             viviendas_pre_df = single_page_precalificacion(response)
             main_df = pd.concat([main_df, viviendas_pre_df])
 
@@ -367,7 +367,7 @@ def all_pages_calificacion(region, comuna):
                 else:
                     break
             # Creating dataframes
-            print(f'Page {page_number} out of {number_of_pages}')
+            print(f'- Page {page_number} out of {number_of_pages}')
             viviendas_cal_df = single_page_calificacion(response)
             main_df = pd.concat([main_df, viviendas_cal_df])
 
@@ -407,7 +407,7 @@ def run():
     # get_cities_per_region(link=HOME_URL)
     # eventtarget = 'ctl00$ContentPlaceHolder1$grdViviendasPre'
     # eventargument = 'Page$1'
-    region = '16'
+    region = '10'
     with open('./json_files/cities_per_region.json') as json_file:
         cities_per_region_dict = json.load(json_file)
     cities_per_region = cities_per_region_dict[region]
@@ -420,8 +420,11 @@ def run():
     for comuna in cities_per_region:
         # comuna = '6'
         # certification = '-1'     # Precalification: 1 / Calificacion: 2 / Both: '-1'
-        print(f'Region: {regions_dict[region]}')
+        print('\n-------------------------------------')
+        print(f'{regions_dict[region]}')
         print(f'Comuna: {cities_dict[comuna]}')
+        print('-------------------------------------')
+
         all_pages_precalificacion(region, comuna)
         all_pages_calificacion(region, comuna)
 
