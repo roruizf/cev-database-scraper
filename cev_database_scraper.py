@@ -401,13 +401,13 @@ def all_pages_calificacion(region, comuna):
     to_save_df.to_csv(path+filename, index=False, encoding="utf-8-sig")
 
 
-def run():
+def run(region):
     start_time = time()
     # get_regions()
     # get_cities_per_region(link=HOME_URL)
     # eventtarget = 'ctl00$ContentPlaceHolder1$grdViviendasPre'
     # eventargument = 'Page$1'
-    region = '10'
+    # region = '6'
     with open('./json_files/cities_per_region.json') as json_file:
         cities_per_region_dict = json.load(json_file)
     cities_per_region = cities_per_region_dict[region]
@@ -433,4 +433,10 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    start_time = time()
+    regions = ['1', '2', '3', '4', '5', '6', '7', '8',
+               '9', '10', '11', '12', '13', '14', '15', '16']
+    for region in regions:
+        run(region)
+    elapsed_time = time() - start_time
+    print("\nElapsed time: %0.2f seconds." % elapsed_time)
