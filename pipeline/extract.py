@@ -25,7 +25,7 @@ def flatten_list(_2d_list):
 
 
 def form_data(eventtarget, eventargument, region, comuna, certification):
-    with open('./json_files/viewstate.json') as json_file:
+    with open('../json_files/viewstate.json') as json_file:
         viewstate_dict = json.load(json_file)
     viewstate = viewstate_dict[region]
     return {
@@ -47,83 +47,6 @@ def form_data(eventtarget, eventargument, region, comuna, certification):
         'ctl00$ContentPlaceHolder1$txtCampo': '0',
         'ctl00$ContentPlaceHolder1$txtOrden': '0'
     }
-
-
-def get_regions(link=HOME_URL):
-    """
-    This function get a list of regions available in the website.
-    It also creates a json file
-    """
-    response = requests.get(HOME_URL)
-    if response.status_code == 200:
-        home = response.content.decode('utf-8')
-        parsed = html.fromstring(home)
-        region_name = parsed.xpath(
-            '//select[@id="ContentPlaceHolder1_dbRegion"]/option[@value]/text()')[1:]
-        region_number = parsed.xpath(
-            '//select[@id="ContentPlaceHolder1_dbRegion"]/option[@value]/@value')[1:]
-        # print(region_name)
-        # print(region_number)
-        regions_dict = dict(zip(region_number, region_name))
-        print(regions_dict)
-    else:
-        raise ValueError(f'Error: {response.status_code}')
-
-    with open('./json_files/regions.json', 'w', encoding='utf-8') as fp:
-        json.dump(regions_dict, fp, ensure_ascii=False)
-    return regions_dict
-
-
-def get_cities_per_region(link=HOME_URL):
-    """
-    This function get ther cities per regions available in the website.
-    It also creates 2 json files
-    """
-    eventtarget = 'DropDownList1'
-    eventargument = ''
-    regions_dict = get_regions(link=HOME_URL)
-    region_list = []
-    city_name_list = []
-    city_number_list = []
-    for region in regions_dict.keys():
-        print(region)
-        formdata = form_data(eventtarget, eventargument,
-                             region, comuna='-1', certification='-1')
-        formdata['__VIEWSTATE'] = "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"
-        response = requests.post(HOME_URL, data=formdata)
-        # print(response.status_code)
-        if response.status_code == 200:
-            home = response.content.decode('utf-8')
-            parsed = html.fromstring(home)
-            region_value = parsed.xpath(
-                '//select[@id="ContentPlaceHolder1_dbRegion"]/option[@selected="selected"]/@value')[0]
-            # print(region_value)
-            region_list.append(region_value)
-            cities_of_region_name = parsed.xpath(
-                '//div[@class="controls"]/select[@id="ContentPlaceHolder1_dbComuna"]/option[@value]/text()')[1:]
-            # print(cities_of_region_name)
-            city_name_list.append(cities_of_region_name)
-            cities_of_region_number = parsed.xpath(
-                '//div[@class="controls"]/select[@id="ContentPlaceHolder1_dbComuna"]/option[@value]/@value')[1:]
-            # print(cities_of_region_number)
-            city_number_list.append(cities_of_region_number)
-        else:
-            raise ValueError(f'Error: {response.status_code}')
-
-    cities_region_dict = dict(zip(region_list, city_number_list))
-    cities_name_dict = dict(
-        zip(flatten_list(city_number_list), flatten_list(city_name_list)))
-
-    cities_name_dict = dict(
-        sorted(cities_name_dict.items(),  key=lambda item: int(item[0])))
-
-    print(cities_region_dict)
-    # print(cities_name_dict)
-    with open('./json_files/cities_per_region.json', 'w', encoding='utf-8') as fp:
-        json.dump(cities_region_dict, fp, ensure_ascii=False)
-    with open('./json_files/cities.json', 'w', encoding='utf-8') as fp:
-        json.dump(cities_name_dict, fp, ensure_ascii=False)
-    return cities_region_dict, cities_name_dict
 
 
 def get_single_page_response(eventtarget, eventargument, region, comuna, certification):
@@ -323,7 +246,7 @@ def all_pages_precalificacion(region, comuna):
     # Formating
     to_save_df = main_df.copy()
     # Saving data into a local folder or database
-    path = './datasets/' + str(region) + '/'
+    path = '../data/raw/' + str(region) + '/'
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -403,7 +326,7 @@ def all_pages_calificacion(region, comuna):
     # Formating
     to_save_df = main_df.copy()
     # Saving data into a local folder or database
-    path = './datasets/' + str(region) + '/'
+    path = '../data/raw/' + str(region) + '/'
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -412,20 +335,20 @@ def all_pages_calificacion(region, comuna):
     to_save_df.to_csv(path+filename, index=False, encoding="utf-8-sig")
 
 
-def main(region):
+def run(region):
     start_time = time()
     # get_regions()
     # get_cities_per_region(link=HOME_URL)
     # eventtarget = 'ctl00$ContentPlaceHolder1$grdViviendasPre'
     # eventargument = 'Page$1'
     # region = '6'
-    with open('./json_files/cities_per_region.json') as json_file:
+    with open('../json_files/cities_per_region.json') as json_file:
         cities_per_region_dict = json.load(json_file)
     cities_per_region = cities_per_region_dict[region]
 
-    with open('./json_files/cities.json') as json_file:
+    with open('../json_files/cities.json') as json_file:
         cities_dict = json.load(json_file)
-    with open('./json_files/regions.json') as json_file:
+    with open('../json_files/regions.json') as json_file:
         regions_dict = json.load(json_file)
 
     for comuna in cities_per_region:
@@ -443,12 +366,17 @@ def main(region):
     print("\nElapsed time: %0.2f seconds." % elapsed_time)
 
 
-if __name__ == '__main__':
+def main(regions):
     start_time = time()
-    # regions = ['1', '2', '3', '4', '5', '6', '7', '8',
-    #    '9', '10', '11', '12', '13', '14', '15', '16']
-    regions = ['9', '10', '11', '12', '13', '14', '15', '16']
     for region in regions:
-        main(region)
+        run(region)
     elapsed_time = time() - start_time
     print("\nElapsed time: %0.2f seconds." % elapsed_time)
+
+
+if __name__ == '__main__':
+
+    # regions = ['1', '2', '3', '4', '5', '6', '7', '8',
+    #    '9', '10', '11', '12', '13', '14', '15', '16']
+    regions = ['15']
+    main(regions)

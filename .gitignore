@@ -1,12 +1,15 @@
 xpath.txt
+common.py
 /datasets
+/data
+/code-testing
 *.ipynb
 *.html
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-
+cev_database_scraper.py
 # C extensions
 *.so
 
