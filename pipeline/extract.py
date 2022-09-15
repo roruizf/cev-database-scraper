@@ -24,6 +24,13 @@ def flatten_list(_2d_list):
     return flat_list
 
 
+def filling_missing_values(target_list, reference_list):
+    missing_values = len(reference_list) - len(target_list)
+    if missing_values > 0:
+        target_list = target_list + ['--'] * missing_values
+    return target_list
+
+
 def form_data(eventtarget, eventargument, region, comuna, certification):
     with open('../json_files/viewstate.json') as json_file:
         viewstate_dict = json.load(json_file)
@@ -80,6 +87,18 @@ def get_single_page_response(eventtarget, eventargument, region, comuna, certifi
                 break
         else:
             status = False
+
+    # Saving html data into a local folder
+    path = '../data/raw/' + str(region) + '/html_files/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    filename = region + "_" + comuna + "_" + certification + \
+        "_" + eventargument.replace('$', '') + '.html'
+    # print(f'Saving {filename} file')
+    with open(path+filename, "wb") as f:
+        f.write(response.content)
+        f.close()
     return response
 
 
@@ -98,6 +117,8 @@ def single_page_precalificacion(response):
     # Getting data for dwellings
     table_columns_pre = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/thead/tr[@class="barra_superior"][1]/th[not(@class) and @scope="col"]/text()')
+    table_columns_pre = table_columns_pre[:-1] + ['Informe', 'Etiqueta']
+
     vivienda_Id_pre = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/tbody/tr/td[not(@class) and not(@style)][1]/text()')
     tipologia_pre = parsed.xpath(
@@ -110,17 +131,25 @@ def single_page_precalificacion(response):
         '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/tbody/tr/td[position() = (last()-2)]/div/img/@src')
     cee_pre_src = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/tbody/tr/td[position() = (last()-1)]/div/img/@src')
+    ver_informe = parsed.xpath(
+        '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/tbody/tr/td[position() = last()]/div/div[@class="BtVerEtiqueta"]/div/input/@name')
+    ver_etiqueta = parsed.xpath(
+        '//table[@id="ContentPlaceHolder1_grdViviendasPre"]/tbody/tr/td[position() = last()]/div/div[@class="BtVerMapa"]/div/input/@name')
 
     # Get the calification letter from src string
     ce_pre = [x.split('Letra')[1].split('.png')[0] for x in ce_pre_src]
     cee_pre = [x.split('Letra')[1].split('.png')[0] for x in cee_pre_src]
+
+    # Filling missing values for ver_informe and ver_etiqueta (when needed)
+    ver_informe = filling_missing_values(ver_informe, comuna_proyecto_pre)
+    ver_etiqueta = filling_missing_values(ver_etiqueta, comuna_proyecto_pre)
 
     # Creating a dictionary in order to create a dataframe
     if message_found_pre:
         # print(
         #     f'{message_found_pre[0]} {message_found_pre[1]} {message_found_pre[-1]}')
         vivienda_pre_dict = dict(zip(table_columns_pre, [
-                                 vivienda_Id_pre, tipologia_pre, comuna_proyecto_pre, proyecto_pre, ce_pre, cee_pre]))
+                                 vivienda_Id_pre, tipologia_pre, comuna_proyecto_pre, proyecto_pre, ce_pre, cee_pre, ver_informe, ver_etiqueta]))
     else:
         # print(f'{message_not_found_pre[0]}')
         vivienda_pre_dict = dict(
@@ -144,6 +173,8 @@ def single_page_calificacion(response):
     # Getting data for dwellings
     table_columns_cal = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasCal"]/thead/tr[@class="barra_superior"][1]/th[not(@class) and @scope="col"]/text()')
+    table_columns_cal = table_columns_cal[:-1] + ['Informe', 'Etiqueta']
+
     vivienda_Id_cal = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasCal"]/tbody/tr/td[not(@class) and not(@style)][1]/text()')
     tipologia_cal = parsed.xpath(
@@ -157,16 +188,25 @@ def single_page_calificacion(response):
     cee_cal_src = parsed.xpath(
         '//table[@id="ContentPlaceHolder1_grdViviendasCal"]/tbody/tr/td[position() = (last()-1)]/div/img/@src')
 
+    ver_informe = parsed.xpath(
+        '//table[@id="ContentPlaceHolder1_grdViviendasCal"]/tbody/tr/td[position() = last()]/div/div[@class="BtVerEtiqueta"]/div/input/@name')
+    ver_etiqueta = parsed.xpath(
+        '//table[@id="ContentPlaceHolder1_grdViviendasCal"]/tbody/tr/td[position() = last()]/div/div[@class="BtVerMapa"]/div/input/@name')
+
     # Get the calification letter from src string
     ce_cal = [x.split('Letra')[1].split('.png')[0] for x in ce_cal_src]
     cee_cal = [x.split('Letra')[1].split('.png')[0] for x in cee_cal_src]
+
+    # Filling missing values for ver_informe and ver_etiqueta (when needed)
+    ver_informe = filling_missing_values(ver_informe, comuna_proyecto_cal)
+    ver_etiqueta = filling_missing_values(ver_etiqueta, comuna_proyecto_cal)
 
     # Creating a dictionary in order to create a dataframe
     if message_found_cal:
         # print(
         #     f'{message_found_cal[0]} {message_found_cal[1]} {message_found_cal[-1]}')
         vivienda_cal_dict = dict(zip(table_columns_cal, [
-                                 vivienda_Id_cal, tipologia_cal, comuna_proyecto_cal, proyecto_cal, ce_cal, cee_cal]))
+                                 vivienda_Id_cal, tipologia_cal, comuna_proyecto_cal, proyecto_cal, ce_cal, cee_cal, ver_informe, ver_etiqueta]))
     else:
         # print(f'{message_not_found_cal[0]}')
         vivienda_cal_dict = dict(
@@ -228,7 +268,7 @@ def all_pages_precalificacion(region, comuna):
         except:
             pagination = False
             print('Failed !!!')
-            path = './datasets/' + str(region) + '/'
+            path = '../data/raw/' + str(region) + '/'
             if not os.path.exists(path):
                 os.makedirs(path)
 
@@ -308,7 +348,7 @@ def all_pages_calificacion(region, comuna):
         except:
             pagination = False
             print('Failed !!!')
-            path = './datasets/' + str(region) + '/'
+            path = '../data/raw/' + str(region) + '/'
             if not os.path.exists(path):
                 os.makedirs(path)
 
@@ -351,6 +391,7 @@ def run(region):
     with open('../json_files/regions.json') as json_file:
         regions_dict = json.load(json_file)
 
+    # cities_per_region = ['250']
     for comuna in cities_per_region:
         # comuna = '6'
         # certification = '-1'     # Precalification: 1 / Calificacion: 2 / Both: '-1'
@@ -376,7 +417,7 @@ def main(regions):
 
 if __name__ == '__main__':
 
-    # regions = ['1', '2', '3', '4', '5', '6', '7', '8',
-    #    '9', '10', '11', '12', '13', '14', '15', '16']
-    regions = ['15']
+    regions = ['1', '2', '3', '4', '5', '6', '7', '8',
+               '9', '10', '11', '12', '13', '14', '15', '16']
+    # regions = ['13']
     main(regions)

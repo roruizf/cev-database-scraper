@@ -20,7 +20,7 @@ def _read_data_files():
     folders_names = os.listdir(dataset_path)
     folders_names.sort(key=float)
     country_data_df = pd.DataFrame([], columns=[
-        'Identificación Vivienda', 'Tipología', 'Comuna', 'Proyecto', 'CE', 'CEE'])
+        'Identificación Vivienda', 'Tipología', 'Comuna', 'Proyecto', 'CE', 'CEE', 'Informe', 'Etiqueta'])
 
     for folder_name in folders_names:
         folder_path = os.path.join(dataset_path, folder_name)
@@ -31,7 +31,7 @@ def _read_data_files():
         data_files_list = data_files[data_files.str.endswith('.csv')].to_list()
 
         region_data_df = pd.DataFrame([], columns=[
-            'Identificación Vivienda', 'Tipología', 'Comuna', 'Proyecto', 'CE', 'CEE'])
+            'Identificación Vivienda', 'Tipología', 'Comuna', 'Proyecto', 'CE', 'CEE', 'Informe', 'Etiqueta'])
         for file in data_files_list:
             csv_file_name = file
             csv_file_path = os.path.join(folder_path, csv_file_name)
@@ -107,7 +107,7 @@ def _translate_column_status(data_df):
 
 def _reorder_columns(data_df):
     data_df = data_df[['Identificación Vivienda', 'Proyecto',
-                       'Tipología', 'Comuna',  'Región', 'Status', 'CE', 'CEE']]
+                       'Tipología', 'Comuna',  'Región', 'Status', 'CE', 'CEE', 'Informe', 'Etiqueta']]
     return data_df
 
 
